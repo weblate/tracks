@@ -346,6 +346,31 @@ class TodosControllerTest < ActionController::TestCase
     assert_equal 1, t.project_id
   end
 
+  def test_update_todo_due_date
+    t = Todo.find(1)
+    login_as(:admin_user)
+
+    due_today_date = Time.zone.now
+    due_this_week_date = Time.zone.now.end_of_week
+    due_next_week_date = due_this_week_date + 7.days
+    due_this_month_date = Time.zone.now.end_of_month
+
+    post :update, xhr: true, params: { :id => 1, :_source_view => 'calendar', "context_name"=>"library", "project_name"=>"Build a working time machine", "todo"=>{"id"=>"1", "notes"=>"", "description"=>"Call Warren Buffet to find out how much he makes per day", "due"=>due_today_date}, "tag_list"=>"foo bar" }
+    assert_response 200
+
+    post :update, xhr: true, params: { :id => 1, :_source_view => 'calendar', "context_name"=>"library", "project_name"=>"Build a working time machine", "todo"=>{"id"=>"1", "notes"=>"", "description"=>"Call Warren Buffet to find out how much he makes per day", "due"=>due_today_date + 1.day}, "tag_list"=>"foo bar" }
+    assert_response 200
+
+    post :update, xhr: true, params: { :id => 1, :_source_view => 'calendar', "context_name"=>"library", "project_name"=>"Build a working time machine", "todo"=>{"id"=>"1", "notes"=>"", "description"=>"Call Warren Buffet to find out how much he makes per day", "due"=>due_this_week_date + 1.day}, "tag_list"=>"foo bar" }
+    assert_response 200
+
+    post :update, xhr: true, params: { :id => 1, :_source_view => 'calendar', "context_name"=>"library", "project_name"=>"Build a working time machine", "todo"=>{"id"=>"1", "notes"=>"", "description"=>"Call Warren Buffet to find out how much he makes per day", "due"=>due_next_week_date + 1.day}, "tag_list"=>"foo bar" }
+    assert_response 200
+
+    post :update, xhr: true, params: { :id => 1, :_source_view => 'calendar', "context_name"=>"library", "project_name"=>"Build a working time machine", "todo"=>{"id"=>"1", "notes"=>"", "description"=>"Call Warren Buffet to find out how much he makes per day", "due"=>due_this_month_date + 1.day}, "tag_list"=>"foo bar" }
+    assert_response 200
+  end
+
   def test_update_todo_delete_project
     t = Todo.find(1)
     login_as(:admin_user)
